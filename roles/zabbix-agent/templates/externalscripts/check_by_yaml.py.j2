@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+
+# Author: heylinux.com
+# Last Modified: 2015/12/25
+
+import os
+import sys
+
+def parse_opts():
+    """Help messages (-h, --help)"""
+
+    import textwrap
+    import argparse
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+        '''
+        examples:
+          {0} -f /data/stats/metrics -k metrics.err
+  
+          /data/stats/metrics:
+          ---
+          metrics:
+            err: 123
+            health: 1
+            qps: 2345.67
+            req: 1234569789
+            req_last: 987654321
+            uptime: 234567
+            uptime_last: 234567
+          '''.format(__file__)
+          ))
+
+    parser.add_argument('-f', metavar='file', type=str, required=True, help='the absolute path of yaml file')
+    parser.add_argument('-k', metavar='key', type=str, required=True, help='key name')
+
+    args = parser.parse_args()
+    return {'file':args.f, 'key':args.k}
+
+def get_value(opts):
+    """Get value from YAML file"""
+
+    try:
+        import yaml
+    except ImportError:
+        sys.stderr.write("ERROR: Requires YAML, try 'yum install PyYAML.'\n")
+        sys.exit(1)
+    try:
+        info = open(opts['file'])
+    except IOError:
+        print "ERROR: No such file or directory: '{0}'".format(opts['file'])
+        sys.exit(1)
+    value = yaml.load(info)
+
+    key_list = opts['key'].split('.')
+    for eachkey in key_list:
+        try:
+            value = value[eachkey]
+        except KeyError:
+            sys.stderr.write("ERROR: No such key: '{0}'\n".format(opts['key']))
+            sys.exit(1)
+
+    info.close()
+
+    return value
+    
+
+if __name__=='__main__':
+    # check arguments
+    if len(sys.argv) < 2:
+        os.system(__file__ + " -h")
+        sys.exit(1)
+
+    # get arguments
+    opts = parse_opts()
+
+    # get the value
+    value = get_value(opts)
+    print value

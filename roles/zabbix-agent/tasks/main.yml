@@ -1,0 +1,114 @@
+---
+- name: install zabbix agent and zabbix-sender
+  yum: name={{ item }} state=latest
+  with_items:
+  - zabbix-agent
+  - zabbix-sender
+  tags:
+  - zabbix-agent
+
+- name: remove conflict conf
+  file: path=/etc/zabbix/zabbix_agentd.d/userparameter_mysql.conf.rpmnew state=absent
+  tags:
+  - zabbix-agent
+  - zabbix-agent-upgrade
+
+- name: install python and python-libs
+  yum: name={{ item }} state=present
+  with_items:
+  - python
+  - python-libs
+  tags:
+  - zabbix-agent
+  - zabbix-agent-rpm
+
+- name: install needed rpm packages
+  yum: name={{ item }} state=present
+  with_items:
+  - PyYAML
+  - python-paramiko
+  - python-requests
+  - python-argparse
+  tags:
+  - zabbix-agent
+  - zabbix-agent-rpm
+
+- name: install needed pip packages
+  pip: name={{ item }} state=present
+  with_items:
+  - pyzabbix
+  tags:
+  - zabbix-agent
+  - zabbix-agent-pip
+
+- name: configure zabbix agent
+  template: src={{ item }}.j2 dest=/etc/zabbix/{{ item }} owner=root group=root mode=0644
+  with_items:
+  - zabbix_agentd.conf
+  notify:
+  - restart zabbix-agent
+  tags:
+  - zabbix-agent
+  - zabbix-agent-conf
+  - zabbix-agent-conf-main
+
+- name: configure zabbix agent
+  template: src=zabbix_agentd.d/{{ item | basename }} dest=/etc/zabbix/zabbix_agentd.d/{{ item | basename | regex_replace("\.j2","") }} owner=zabbix group=zabbix mode=0644
+  with_fileglob:
+  - ../templates/zabbix_agentd.d/userparameter_*.conf.j2
+  notify:
+  - restart zabbix-agent
+  tags:
+  - zabbix-agent
+  - zabbix-agent-env
+  - zabbix-agent-script
+  - zabbix-agent-conf
+
+- name: configurations for userparameters - directories
+  file: path={{ item.path }} state=directory owner={{ item.owner }} group={{ item.owner }} mode=0755
+  with_items:
+  - { path: '/var/crash', owner: 'root' }
+  - { path: '/var/lib/zabbix', owner: 'zabbix' }
+  - { path: '/var/lib/zabbix/logcheck', owner: 'zabbix' }
+  - { path: '/usr/lib/zabbix', owner: 'zabbix' }
+  - { path: '/usr/lib/zabbix/externalscripts', owner: 'zabbix' }
+  - { path: '/usr/lib/zabbix/nagiosscripts', owner: 'zabbix' }
+  tags:
+  - zabbix-agent
+  - zabbix-agent-env
+  - zabbix-agent-script
+  - zabbix-agent-conf
+
+- name: configurations for userparameters - templates
+  template: src=userparameters_conf/{{ item.src }} dest=/var/lib/zabbix/{{ item.dest }} owner=zabbix group=zabbix mode=0644
+  with_items:
+  - { src: 'my.cnf_client.j2', dest: '.my.cnf' }
+  tags:
+  - zabbix-agent
+  - zabbix-agent-env
+  - zabbix-agent-conf
+
+- name: configurations for nagiosscripts - templates
+  template: src=nagiosscripts/{{ item | basename }} dest=/usr/lib/zabbix/nagiosscripts/{{ item | basename | regex_replace("\.j2","") }} owner=zabbix group=zabbix mode=0755
+  with_fileglob:
+  - ../templates/nagiosscripts/*.j2
+  tags:
+  - zabbix-agent
+  - zabbix-agent-env
+  - zabbix-agent-script
+  - zabbix-agent-conf
+
+- name: configurations for externalscripts - templates
+  template: src=externalscripts/{{ item | basename }} dest=/usr/lib/zabbix/externalscripts/{{ item | basename | regex_replace("\.j2","") }} owner=zabbix group=zabbix mode=0755
+  with_fileglob:
+  - ../templates/externalscripts/*.j2
+  tags:
+  - zabbix-agent
+  - zabbix-agent-env
+  - zabbix-agent-script
+  - zabbix-agent-conf
+
+- name: start zabbix agent
+  service: name=zabbix-agent enabled=yes state=started
+  tags:
+  - zabbix-agent

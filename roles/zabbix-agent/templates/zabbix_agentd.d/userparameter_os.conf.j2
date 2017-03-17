@@ -1,0 +1,6 @@
+UserParameter=os.ntpstat,ntpstat |grep -wc 'synchronised'
+
+UserParameter=os.mailqueue,mailq |grep -c "^[A-F0-9]"
+UserParameter=os.tcpconns,ss -s |head -n1 |awk '{print $2}'
+
+UserParameter=os.check_by_yaml[*],/usr/lib/zabbix/externalscripts/check_by_yaml.py -f $1 -k $2

@@ -1,0 +1,11 @@
+- name: reload zabbix-agent
+  service: name=zabbix-agent state=reloaded
+  tags:
+  - zabbix
+  - zabbix-agent
+
+- name: restart zabbix-agent
+  service: name=zabbix-agent state=restarted
+  tags:
+  - zabbix
+  - zabbix-agent

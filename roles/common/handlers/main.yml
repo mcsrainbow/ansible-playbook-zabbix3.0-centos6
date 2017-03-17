@@ -1,0 +1,7 @@
+---
+- name: restart sshd
+  service: name=sshd state=restarted
+  tags:
+  - common
+  - common-etc
+  - common-etc-sshd

@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Run mysql_secure_installation for new mysql installation
+
+password="{{ database['users']['root'] }}"
+markfile="/var/lib/.ansible_percona_server_dbsecured"
+
+if [[ -a ${markfile} ]]; then
+  exit 0
+fi
+
+if ! $(ps aux |grep /usr/bin/mysqld_safe |grep -vq grep); then
+  /etc/init.d/mysql start
+fi
+
+echo -e "''\n
+Y
+${password}
+${password}
+\n
+\n
+\n
+\n"|/usr/bin/mysql_secure_installation
+
+if [[ $? -eq 0 ]]; then
+  touch ${markfile}
+fi

@@ -1,0 +1,25 @@
+---
+- name: install grafana package
+  yum: name=http://{{ repository_server['ip']}}:{{ repository_server['port'] }}/misc/zabbix/grafana-2.5.0-1.x86_64.rpm state=present
+  tags:
+  - zabbix-grafana
+
+- name: extract grafana-zabbix into /usr/share/grafana/public/app/plugins/datasource
+  unarchive: src=grafana-zabbix.tgz dest=/usr/share/grafana/public/app/plugins/datasource
+  args:
+    creates: /usr/share/grafana/public/app/plugins/datasource/zabbix
+  tags:
+  - zabbix-grafana
+
+- name: configure the grafana-zabbix plugin.json
+  template: src=plugin.json.j2 dest=/usr/share/grafana/public/app/plugins/datasource/zabbix/plugin.json owner=zabbix group=zabbix mode=0644
+  notify: restart grafana-server
+  tags:
+  - zabbix-grafana
+  - zabbix-grafana-conf
+
+- name: start grafana-server service
+  service: name=grafana-server enabled=yes state=started
+  tags:
+  - zabbix-grafana
+  - zabbix-grafana-conf

@@ -1,0 +1,46 @@
+---
+- name: install Percona server packages
+  yum: name={{ item }} state=present
+  with_items:
+  - Percona-Server-shared-56
+  - Percona-Server-client-56
+  - Percona-Server-server-56
+  - percona-xtrabackup
+  - qpress
+  tags:
+  - percona-server
+  - percona-server-rpm
+
+- name: create required directories
+  file: path={{ item.path }} state=directory owner={{ item.owner }} group={{ item.owner }} mode=0755
+  with_items:
+  - { path: '/root/deploy', owner: 'root' }
+  tags:
+  - percona-server
+
+- name: copy dbinit scripts to /root/deploy
+  template: src={{ item }}.j2 dest=/root/deploy/{{ item }} mode=0755 owner=root group=root
+  with_items:
+  - run_mysql_secure_installation.sh
+  tags:
+  - percona-server
+  - percona-server-init
+
+- name: run mysql_secure_installation
+  shell: /root/deploy/run_mysql_secure_installation.sh
+  args:
+    creates: /var/lib/.ansible_percona_server_dbsecured
+  tags:
+  - percona-server
+  - percona-server-init
+
+- name: configure /etc/my.cnf
+  template: src=my.cnf.j2 dest=/etc/my.cnf owner=mysql group=mysql mode=0644
+  tags:
+  - percona-server
+  - percona-server-conf
+
+- name: start percona mysql server
+  service: name=mysql enabled=yes state=started
+  tags:
+  - percona-server

@@ -1,0 +1,14 @@
+database:
+  type: 'mysql'
+  users:
+    root: 'heydevops'
+    zabbix: 'zabbix'
+
+repository_server:
+  ip: '10.0.1.101'
+  hostname: 'repo.colo.heylinux.com'
+  port: 80
+
+zabbix_server:
+  ip: '10.0.1.102'
+  hostname: 'zabbix1.colo.heylinux.com'

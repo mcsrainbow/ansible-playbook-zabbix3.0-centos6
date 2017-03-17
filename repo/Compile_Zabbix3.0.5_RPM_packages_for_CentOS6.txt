@@ -1,0 +1,199 @@
+1. Upgrade the VM to latest CentOS 6 release
+[root@idc1-rpmbuild1 ~]# cat /etc/redhat-release
+CentOS release 6.4 (Final)
+
+[root@idc1-rpmbuild1 ~]# yum update -y
+
+2. Install the rpmbuild and Curl related packages
+[root@idc1-rpmbuild1 ~]# yum install -y git rpm-build gcc make automake cmake
+[root@idc1-rpmbuild1 ~]# yum install -y openldap-devel libssh2-devel zlib-devel nss-devel stunnel perl-Time-HiRes valgrind libidn-devel
+
+3. Compile the Curl 7.29.0-25 RPM packages for CentOS 6 as it's the default version on CentOS 7
+[root@idc1-rpmbuild1 ~]# yum install wget
+[root@idc1-rpmbuild1 ~]# useradd packager
+[root@idc1-rpmbuild1 ~]# useradd mockbuild
+[root@idc1-rpmbuild1 ~]# echo "% _topdir /root/rpmbuild" > /root/.rpmmacros
+[root@idc1-rpmbuild1 ~]# mkdir /root/rpmbuild
+[root@idc1-rpmbuild1 ~]# mkdir /root/rpmbuild/SRPMS
+[root@idc1-rpmbuild1 ~]# cd /root/rpmbuild/SRPMS
+[root@idc1-rpmbuild1 SRPMS]# wget http://buildlogs.cdn.centos.org/c7.1511.00/curl/20151122155944/7.29.0-25.el7.centos.x86_64/curl-7.29.0-25.el7.centos.src.rpm
+
+[root@idc1-rpmbuild1 SRPMS]# rpm -ivh curl-7.29.0-25.el7.centos.src.rpm
+   1:curl                   ########################################### [100%]
+
+[root@idc1-rpmbuild1 SRPMS]# cd ..
+[root@idc1-rpmbuild1 rpmbuild]# ll
+total 12
+drwxr-xr-x 2 root root 4096 Oct  9 03:59 SOURCES
+drwxr-xr-x 2 root root 4096 Oct  9 03:59 SPECS
+drwxr-xr-x 2 root root 4096 Oct  9 03:56 SRPMS
+
+[root@idc1-rpmbuild1 rpmbuild]# cd SPECS
+[root@idc1-rpmbuild1 SPECS]# ll
+total 48
+-rw-rw-r--. 1 mockbuild mockbuild 47421 Nov 22  2015 curl.spec
+
+[root@idc1-rpmbuild1 SPECS]# rpmbuild -ba curl.spec
+...
++ cp -pr docs/CONTRIBUTE docs/libcurl/ABI /root/rpmbuild/BUILDROOT/curl-7.29.0-25.el6.x86_64/usr/share/doc/libcurl-devel-7.29.0
++ exit 0
+Provides: curl-devel = 7.29.0-25.el6 pkgconfig(libcurl) = 7.29.0
+Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1 rpmlib(VersionedDependencies) <= 3.0.3-1
+Requires: /bin/sh /usr/bin/pkg-config libcurl.so.4()(64bit)
+Obsoletes: curl-devel < 7.29.0-25.el6
+Processing files: curl-debuginfo-7.29.0-25.el6.x86_64
+Checking for unpackaged file(s): /usr/lib/rpm/check-files /root/rpmbuild/BUILDROOT/curl-7.29.0-25.el6.x86_64
+warning: Could not canonicalize hostname: idc1-rpmbuild1
+Wrote: /root/rpmbuild/SRPMS/curl-7.29.0-25.el6.src.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/curl-7.29.0-25.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/libcurl-7.29.0-25.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/libcurl-devel-7.29.0-25.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/curl-debuginfo-7.29.0-25.el6.x86_64.rpm
+Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.cLLwGr
++ umask 022
++ cd /root/rpmbuild/BUILD
++ cd curl-7.29.0
++ rm -rf /root/rpmbuild/BUILDROOT/curl-7.29.0-25.el6.x86_64
++ exit 0
+
+[root@idc1-rpmbuild1 SPECS]# cd ..
+[root@idc1-rpmbuild1 rpmbuild]# cd RPMS/x86_64/
+[root@idc1-rpmbuild1 x86_64]# ll
+total 2008
+-rw-r--r-- 1 root root  266568 Oct  9 04:37 curl-7.29.0-25.el6.x86_64.rpm
+-rw-r--r-- 1 root root 1263756 Oct  9 04:37 curl-debuginfo-7.29.0-25.el6.x86_64.rpm
+-rw-r--r-- 1 root root  210068 Oct  9 04:37 libcurl-7.29.0-25.el6.x86_64.rpm
+-rw-r--r-- 1 root root  304180 Oct  9 04:37 libcurl-devel-7.29.0-25.el6.x86_64.rpm
+
+4. Install the compiled Curl RPM packages
+[root@idc1-rpmbuild1 x86_64]# rpm -Uvh curl-7.29.0-25.el6.x86_64.rpm libcurl-7.29.0-25.el6.x86_64.rpm libcurl-devel-7.29.0-25.el6.x86_64.rpm
+Preparing...                ########################################### [100%]
+   1:libcurl                ########################################### [ 33%]
+   2:curl                   ########################################### [ 67%]
+   3:libcurl-devel          ########################################### [100%]
+
+5. Install the Zabbix related packages
+[root@idc1-rpmbuild1 x86_64]# yum install -y http://repo.zabbix.com/non-supported/rhel/6/x86_64/iksemel-1.4-2.el6.x86_64.rpm
+[root@idc1-rpmbuild1 x86_64]# yum install -y http://repo.zabbix.com/non-supported/rhel/6/x86_64/iksemel-devel-1.4-2.el6.x86_64.rpm
+[root@idc1-rpmbuild1 x86_64]# yum install -y http://repo.zabbix.com/non-supported/rhel/6/x86_64/iksemel-utils-1.4-2.el6.x86_64.rpm
+[root@idc1-rpmbuild1 x86_64]# yum install -y mysql-devel net-snmp-devel unixODBC-devel OpenIPMI-devel java-devel postgresql-devel gnutls-devel sqlite-devel libxml2-devel
+
+6. Compile the Zabbix 3.0 RPM packages
+[root@idc1-rpmbuild1 x86_64]# cd /root/rpmbuild/SRPMS
+[root@idc1-rpmbuild1 SRPMS]# wget http://repo.zabbix.com/zabbix/3.0/rhel/7/SRPMS/zabbix-3.0.5-1.el7.src.rpm
+[root@idc1-rpmbuild1 SRPMS]# ll
+total 19392
+-rw-r--r-- 1 root root  2229279 Oct  9 04:37 curl-7.29.0-25.el6.src.rpm
+-rw-r--r-- 1 root root  2229387 Nov 22  2015 curl-7.29.0-25.el7.centos.src.rpm
+-rw-r--r-- 1 root root 15392597 Oct  3 08:02 zabbix-3.0.5-1.el7.src.rpm
+
+[root@idc1-rpmbuild1 SRPMS]# rpm -ivh zabbix-3.0.5-1.el7.src.rpm
+[root@idc1-rpmbuild1 SRPMS]# cd ../SPECS/
+[root@idc1-rpmbuild1 SPECS]# ll
+total 80
+-rw-rw-r--. 1 mockbuild mockbuild 47421 Nov 22  2015 curl.spec
+-rw-r--r--. 1 packager  packager  31522 Oct  2 15:55 zabbix.spec
+
+[root@idc1-rpmbuild1 SPECS]# rpmbuild -ba zabbix.spec
+...
+Obsoletes: zabbix zabbix-server
+Processing files: zabbix-web-3.0.5-1.el6.noarch
+Executing(%doc): /bin/sh -e /var/tmp/rpm-tmp.DAHxBb
++ umask 022
++ cd /root/rpmbuild/BUILD
++ cd zabbix-3.0.5
++ DOCDIR=/root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64/usr/share/doc/zabbix-web-3.0.5
++ export DOCDIR
++ rm -rf /root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64/usr/share/doc/zabbix-web-3.0.5
++ /bin/mkdir -p /root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64/usr/share/doc/zabbix-web-3.0.5
++ cp -pr AUTHORS ChangeLog COPYING NEWS README /root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64/usr/share/doc/zabbix-web-3.0.5
++ cp -pr conf/httpd22-example.conf conf/httpd24-example.conf /root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64/usr/share/doc/zabbix-web-3.0.5
++ exit 0
+Provides: config(zabbix-web) = 3.0.5-1.el6
+Requires(interp): /bin/sh /bin/sh
+Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+Requires(post): /bin/sh /usr/sbin/update-alternatives
+Requires(preun): /bin/sh /usr/sbin/update-alternatives
+Requires: /bin/bash
+Processing files: zabbix-web-mysql-3.0.5-1.el6.noarch
+Processing files: zabbix-web-pgsql-3.0.5-1.el6.noarch
+Processing files: zabbix-web-japanese-3.0.5-1.el6.noarch
+Processing files: zabbix-debuginfo-3.0.5-1.el6.x86_64
+Checking for unpackaged file(s): /usr/lib/rpm/check-files /root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64
+warning: Could not canonicalize hostname: idc1-rpmbuild1
+Wrote: /root/rpmbuild/SRPMS/zabbix-3.0.5-1.el6.src.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-agent-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-get-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-sender-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-proxy-mysql-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-proxy-pgsql-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-proxy-sqlite3-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-java-gateway-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-server-mysql-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-server-pgsql-3.0.5-1.el6.x86_64.rpm
+Wrote: /root/rpmbuild/RPMS/noarch/zabbix-web-3.0.5-1.el6.noarch.rpm
+Wrote: /root/rpmbuild/RPMS/noarch/zabbix-web-mysql-3.0.5-1.el6.noarch.rpm
+Wrote: /root/rpmbuild/RPMS/noarch/zabbix-web-pgsql-3.0.5-1.el6.noarch.rpm
+Wrote: /root/rpmbuild/RPMS/noarch/zabbix-web-japanese-3.0.5-1.el6.noarch.rpm
+Wrote: /root/rpmbuild/RPMS/x86_64/zabbix-debuginfo-3.0.5-1.el6.x86_64.rpm
+Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.uSipj5
++ umask 022
++ cd /root/rpmbuild/BUILD
++ cd zabbix-3.0.5
++ rm -rf /root/rpmbuild/BUILDROOT/zabbix-3.0.5-1.el6.x86_64
++ exit 0
+
+[root@idc1-rpmbuild1 SPECS]# cd ../RPMS
+[root@idc1-rpmbuild1 RPMS]# tree
+.
+├── noarch
+│   ├── zabbix-web-3.0.5-1.el6.noarch.rpm
+│   ├── zabbix-web-japanese-3.0.5-1.el6.noarch.rpm
+│   ├── zabbix-web-mysql-3.0.5-1.el6.noarch.rpm
+│   └── zabbix-web-pgsql-3.0.5-1.el6.noarch.rpm
+└── x86_64
+    ├── curl-7.29.0-25.el6.x86_64.rpm
+    ├── curl-debuginfo-7.29.0-25.el6.x86_64.rpm
+    ├── libcurl-7.29.0-25.el6.x86_64.rpm
+    ├── libcurl-devel-7.29.0-25.el6.x86_64.rpm
+    ├── zabbix-agent-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-debuginfo-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-get-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-java-gateway-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-proxy-mysql-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-proxy-pgsql-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-proxy-sqlite3-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-sender-3.0.5-1.el6.x86_64.rpm
+    ├── zabbix-server-mysql-3.0.5-1.el6.x86_64.rpm
+    └── zabbix-server-pgsql-3.0.5-1.el6.x86_64.rpm
+
+2 directories, 18 files
+
+7. Create a YUM repo for the compiled Zabbix 3.0 RPM packages
+7.1 Install packages and create a repo dir
+[root@idc1-rpmbuild1 RPMS]# yum install -y httpd createrepo yum-utils
+[root@idc1-rpmbuild1 RPMS]# mkdir -p /var/www/html/repo
+
+7.2 Create YUM repo for zabbix-non-supported packages
+[root@idc1-rpmbuild1 RPMS]# vim /etc/yum.repos.d/zabbix.repo
+[zabbix-non-supported]
+name=Zabbix Official Repository non-supported - $basearch
+baseurl=http://repo.zabbix.com/non-supported/rhel/6/$basearch/
+enabled=1
+gpgcheck=0
+
+[root@idc1-rpmbuild1 RPMS]# reposync -r zabbix-non-supported -p /var/www/html/repo/
+[root@idc1-rpmbuild1 RPMS]# mkdir -p /var/www/html/repo/zabbix-non-supported/el6/x86_64/
+[root@idc1-rpmbuild1 RPMS]# mv /var/www/html/repo/zabbix-non-supported/*.* /var/www/html/repo/zabbix-non-supported/el6/x86_64/
+[root@idc1-rpmbuild1 RPMS]# cd /var/www/html/repo/zabbix-non-supported/el6/x86_64/
+[root@idc1-rpmbuild1 x86_64]# createrepo .
+
+7.3 Create YUM repo for zabbix 3.0 packages
+[root@idc1-rpmbuild1 x86_64]# mkdir -p /var/www/html/repo/zabbix/3.0/el6/x86_64/
+[root@idc1-rpmbuild1 x86_64]# cd /var/www/html/repo/zabbix/3.0/el6/x86_64/
+[root@idc1-rpmbuild1 x86_64]# cp -rpa /root/rpmbuild/RPMS/noarch/* .
+[root@idc1-rpmbuild1 x86_64]# cp -rpa /root/rpmbuild/RPMS/x86_64/* .
+[root@idc1-rpmbuild1 x86_64]# createrepo .
+
+7.4 Start httpd service to enable the YUM repo
+[root@idc1-rpmbuild1 zabbix]# /etc/init.d/httpd start

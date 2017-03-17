@@ -1,0 +1,127 @@
+---
+- name: configure repo files
+  template: src={{ item }}.j2 dest=/etc/yum.repos.d/{{ item }} mode=0644 owner=root group=root
+  with_items:
+  - CentOS-Base.repo
+  - epel.repo
+  - percona.repo
+  - zabbix.repo
+  tags:
+  - common
+  - common-repo
+
+- name: install basic packages
+  yum: name={{ item }}
+  with_items:
+  - vim
+  - gcc
+  - cpp
+  - cmake
+  - mlocate
+  - tree
+  - htop
+  - iftop
+  - nc
+  - bind-utils
+  - wget
+  - git
+  - sysstat
+  - ntp
+  - python-pip
+  - yum-utils
+  - libselinux-python
+  - unzip
+  - gzip
+  tags:
+  - common
+  - common-yum
+
+- name: start ntpd service
+  service: name=ntpd enabled=yes state=started
+  tags:
+  - common
+  - common-yum
+  - common-ntpd
+
+- name: create /root/.pip
+  file: path=/root/.pip state=directory owner=root group=root mode=0644
+  tags:
+  - common
+  - common-yum
+
+- name: configure /root/.pip/pip.conf
+  template: src=pip.conf.j2 dest=/root/.pip/pip.conf owner=root group=root mode=0644
+  tags:
+  - common
+  - common-yum
+
+- name: configure /etc/hosts
+  template: src=etc_hosts.j2 dest=/etc/hosts mode=0644 owner=root group=root
+  tags:
+  - common
+  - common-etc
+
+- name: configure /etc/bashrc
+  template: src=etc_bashrc.j2 dest=/etc/bashrc mode=0644 owner=root group=root
+  tags:
+  - common
+  - common-etc
+
+- name: configure /etc/sudoers
+  template: src=etc_sudoers.j2 dest=/etc/sudoers mode=0440 owner=root group=root
+  tags:
+  - common
+  - common-etc
+
+- name: configure /etc/ssh/sshd_config
+  template: src=sshd_config.j2 dest=/etc/ssh/sshd_config mode=0644 owner=root group=root 
+  notify: restart sshd
+  tags:
+  - common
+  - common-etc
+  - common-etc-sshd
+
+- name: configure /etc/sysctl.conf
+  template: src=etc_sysctl.conf.j2 dest=/etc/sysctl.conf mode=0644 owner=root group=root 
+  register: sysctl_conf
+  tags:
+  - common
+  - common-etc
+
+- name: run command sysctl -p
+  shell: sysctl -p
+  when: sysctl_conf|changed
+  tags:
+  - common
+  - common-etc
+
+- name: configure /etc/security/limits.d/90-nproc.conf and 90-nofile.conf
+  copy: src={{ item }} dest=/etc/security/limits.d/{{ item }}
+  with_items:
+  - 90-nproc.conf
+  - 90-nofile.conf
+  tags:
+  - common
+  - common-etc
+
+- name: install rsyslog
+  yum: name=rsyslog state=present
+  tags:
+  - common
+  - common-rsyslog
+
+- name: start rsyslog service
+  service: name=rsyslog state=running enabled=yes
+  tags:
+  - common
+  - common-rsyslog
+
+- name: create /root/deploy directory
+  file: path=/root/deploy mode=0755 owner=root group=root state=directory
+  tags:
+  - common
+
+- name: configure /etc/rc.local
+  template: src=etc_rc.local.j2 dest=/etc/rc.local owner=root group=root mode=0755
+  tags:
+  - common

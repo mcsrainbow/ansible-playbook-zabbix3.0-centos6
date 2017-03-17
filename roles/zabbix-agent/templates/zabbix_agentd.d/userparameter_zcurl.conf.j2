@@ -1,0 +1,26 @@
+UserParameter=web.zcurl[*],/usr/lib/zabbix/externalscripts/zcurl.py -u $1
+UserParameter=web.zcurl.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u $1 -V
+
+UserParameter=web.zcurl.local[*],/usr/lib/zabbix/externalscripts/zcurl.py -u http://${HOSTNAME}$1 
+UserParameter=web.zcurl.local.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u http://${HOSTNAME}$1 -V
+
+UserParameter=web.zcurl.local.https[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 
+UserParameter=web.zcurl.local.https.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -V
+
+UserParameter=web.zcurl.content[*],/usr/lib/zabbix/externalscripts/zcurl.py -u $1 -c $2
+UserParameter=web.zcurl.content.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u $1 -c $2 -V
+
+UserParameter=web.zcurl.content.local[*],/usr/lib/zabbix/externalscripts/zcurl.py -u http://${HOSTNAME}$1 -c $2
+UserParameter=web.zcurl.content.local.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u http://${HOSTNAME}$1 -c $2 -V
+
+UserParameter=web.zcurl.content.local.https[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -c $2
+UserParameter=web.zcurl.content.local.https.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -c $2 -V
+
+UserParameter=web.zcurl.timeout[*],/usr/lib/zabbix/externalscripts/zcurl.py -u $1 -t $2
+UserParameter=web.zcurl.timeout.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u $1 -t $2 -V
+
+UserParameter=web.zcurl.timeout.local[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -t $2
+UserParameter=web.zcurl.timeout.local.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -t $2 -V
+
+UserParameter=web.zcurl.timeout.local.https[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -t $2
+UserParameter=web.zcurl.timeout.local.https.value[*],/usr/lib/zabbix/externalscripts/zcurl.py -u https://${HOSTNAME}$1 -t $2 -V

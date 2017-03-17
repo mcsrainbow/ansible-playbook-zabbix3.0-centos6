@@ -1,0 +1,13 @@
+UserParameter=hadoop.ooziestatus,OOZIE_URL="http://${HOSTNAME}:11000/oozie" oozie admin -status |grep -c NORMAL
+
+UserParameter=hadoop.dfs.metrics[*],/usr/bin/hdfs dfsadmin -report | head -n 9 | grep '$1:' | cut -d: -f2 | awk '{print $$1}'
+UserParameter=hadoop.dfs.metrics_pct[*],/usr/bin/hdfs dfsadmin -report | head -n 9 | grep '$1%:' | cut -d: -f2 | awk '{print $$1}'  | cut -d% -f1
+
+UserParameter=hadoop.datanodes.metrics[*],/usr/bin/hdfs dfsadmin -report -$1 | grep -wc Name
+UserParameter=hadoop.deadnodes.unexpected,/usr/bin/hdfs dfsadmin -report -dead | grep -B2 'Normal' | grep Hostname | awk '{print $$2}' | xargs
+UserParameter=hadoop.dfshealth,/usr/lib/zabbix/externalscripts/zcurl.py -u http://${HOSTNAME}:50070/dfshealth.html -c Summary
+UserParameter=hadoop.namenode.failover[*],/usr/bin/hdfs haadmin -getServiceState $1 | grep -c $2
+
+UserParameter=hadoop.rmhealth,/usr/lib/zabbix/externalscripts/zcurl.py -u http://${HOSTNAME}:8088/cluster -c cluster
+UserParameter=hadoop.rmnodes.unhealthy,/usr/bin/yarn node -list -states UNHEALTHY 2>/dev/null | grep "Total Nodes" | cut -d ":" -f 2
+UserParameter=hadoop.rmnodes.total,/usr/bin/yarn node -list | grep "Total Nodes" | cut -d ":" -f 2

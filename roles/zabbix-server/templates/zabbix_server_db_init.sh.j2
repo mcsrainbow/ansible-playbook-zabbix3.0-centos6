@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# DBInit for new zabbix server mysql installation
+
+password="{{ database['users']['root'] }}"
+markfile="/var/lib/.ansible_zabbix_server_dbinitialized"
+
+if [[ -a ${markfile} ]]; then
+  exit 0
+fi
+
+# check if mysql is not running then start it
+if ! $(ps aux |grep /usr/bin/mysqld_safe |grep -vq grep); then
+  /etc/init.d/mysql start
+fi
+
+# check if failed to start mysql then quit
+if ! $(ps aux |grep /usr/bin/mysqld_safe |grep -vq grep); then
+  exit 2
+fi
+
+# init zabbix server mysql database
+dbsqldir=$(ls /usr/share/doc/ |grep zabbix-server-mysql |tail -n1)
+cd /usr/share/doc/${dbsqldir}/
+if [[ -f create.sql.gz ]]; then
+  gzip -d create.sql.gz
+fi
+if [[ $? -eq 0 ]]; then
+  mysql -uroot -p${password} -e "create database zabbix character set utf8 collate utf8_bin;"
+  if [[ $? -eq 0 ]]; then
+    mysql -uroot -p${password} -e "grant all privileges on zabbix.* to zabbix@localhost identified by '{{ database['users']['zabbix'] }}';" 
+    mysql -uroot -p${password} -e "grant all privileges on zabbix.* to zabbi@'127.0.0.1' identified by '{{ database['users']['zabbix'] }}';" 
+    mysql -uroot -p${password} -e "flush privileges;" 
+    if [[ -f /usr/share/doc/${dbsqldir}/create.sql ]]; then
+      mysql -uroot -p${password} zabbix < create.sql
+    else
+      cd create/
+      mysql -uroot -p${password} zabbix < schema.sql
+      mysql -uroot -p${password} zabbix < images.sql
+      mysql -uroot -p${password} zabbix < data.sql
+    fi
+  fi
+fi
+
+if [[ $? -eq 0 ]]; then
+  touch ${markfile}
+fi

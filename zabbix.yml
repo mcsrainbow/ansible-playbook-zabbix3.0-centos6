@@ -1,0 +1,15 @@
+---
+- hosts: all
+  roles:
+  - common
+
+- hosts: zabbix_server
+  roles:
+  - percona-server
+  - zabbix-server
+  - zabbix-agent
+  - zabbix-grafana
+
+- hosts: zabbix_agent
+  roles:
+  - zabbix-agent

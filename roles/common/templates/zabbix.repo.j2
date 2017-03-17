@@ -1,0 +1,17 @@
+[webtatic]
+name=Webtatic Repository EL6
+baseurl=https://repo.webtatic.com/yum/el6/$basearch/
+enabled=1
+gpgcheck=0
+
+[zabbix]
+name=Zabbix Custom Repository EL6
+baseurl=http://{{ repository_server['ip'] }}:{{ repository_server['port'] }}/zabbix/3.0/el6/x86_64/
+enabled=1
+gpgcheck=0
+
+[zabbix-non-supported]
+name=Zabbix Custom Repository non-supported EL6
+baseurl=http://{{ repository_server['ip'] }}:{{ repository_server['port'] }}/zabbix/non-supported/el6/x86_64/
+enabled=1
+gpgcheck=0

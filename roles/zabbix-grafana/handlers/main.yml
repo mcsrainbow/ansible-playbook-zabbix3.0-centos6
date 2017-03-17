@@ -1,0 +1,9 @@
+- name: reload grafana-server
+  service: name=grafana-server state=reloaded
+  tags:
+  - zabbix-grafana
+
+- name: restart grafana-server
+  service: name=grafana-server state=restarted
+  tags:
+  - zabbix-grafana

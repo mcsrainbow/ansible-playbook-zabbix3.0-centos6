@@ -1,0 +1,15 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+# local_fqdn
+{{ ansible_default_ipv4.address }} {{ ansible_fqdn }} {{ ansible_hostname }}
+
+# repository_server
+{% if repository_server.has_key('ip') and repository_server.has_key('hostname') %}
+{{ repository_server['ip'] }} {{ repository_server['hostname'] }} {{ repository_server['hostname'].split('.')[0] }} repository-server
+{% endif %}
+
+# zabbix_server
+{% if zabbix_server.has_key('ip') and zabbix_server.has_key('hostname') %}
+{{ zabbix_server['ip'] }} {{ zabbix_server['hostname'] }} {{ zabbix_server['hostname'].split('.')[0] }} zabbix-server
+{% endif %}

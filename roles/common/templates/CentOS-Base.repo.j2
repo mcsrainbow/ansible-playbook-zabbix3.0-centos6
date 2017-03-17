@@ -1,0 +1,17 @@
+[base]
+name=CentOS-6 - Base
+baseurl=https://mirrors.aliyun.com/centos/6/os/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+[updates]
+name=CentOS-6 - Updates
+baseurl=https://mirrors.aliyun.com/centos/6/updates/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
+[extras]
+name=CentOS-$releasever - Extras
+baseurl=https://mirrors.aliyun.com/centos/6/extras/$basearch/
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
