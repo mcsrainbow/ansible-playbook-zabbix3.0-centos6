@@ -1,4 +1,4 @@
-## Ansible Playbook for Zabbix 3.0.x (Server and Agent) on CentOS6
+## Ansible playbook for Zabbix 3.0.x (Server and Agent) on CentOS6
 
 ### Indexs
 ```
