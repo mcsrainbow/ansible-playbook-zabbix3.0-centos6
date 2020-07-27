@@ -1,5 +1,7 @@
 ### Ansible playbook for Zabbix 3.0.x (Server and Agent) on CentOS6
 
+#### Structure
+
 ```
 zabbix.hosts - Inventory file
 zabbix.yml - Playbook file
