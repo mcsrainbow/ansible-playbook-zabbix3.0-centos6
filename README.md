@@ -1,6 +1,7 @@
 ## Ansible playbook for Zabbix 3.0.x (Server and Agent) on CentOS6
 
 ### Indexs
+
 ```
 zabbix.hosts - Inventory file
 zabbix.yml - Playbook file
@@ -16,4 +17,3 @@ roles/zabbix-server - Install Zabbix server
 roles/zabbix-agent - Install Zabbix agent
 roles/zabbix-grafana - Install Grafana for Zabbix server
 ```
-
